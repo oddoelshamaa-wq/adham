@@ -3,247 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عالمي الجميل ❤️</title>
-    <!-- خطوط عربية فخمة -->
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Cairo:wght@600;900&display=swap" rel="stylesheet">
+    <title>عالمنا الخاص ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --accent: #ff0055;
-            --gold: #ffd700;
+        :root { --accent: #ff0055; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: 'Cairo', sans-serif; }
+
+        /* شاشة الدخول */
+        #intro {
+            position: fixed; inset: 0; background: #000; z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
 
-        body, html {
-            margin: 0; padding: 0;
-            width: 100%; height: 100%;
-            background: #050505;
-            color: #fff;
-            font-family: 'Cairo', sans-serif;
-            overflow: hidden;
+        .heart-btn {
+            font-size: 80px; cursor: pointer; animation: pulse 1.5s infinite; filter: drop-shadow(0 0 20px var(--accent));
         }
 
-        /* شاشة البداية السينمائية */
-        #start-screen {
-            position: fixed; inset: 0;
-            background: #000;
-            z-index: 9999;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            transition: 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        /* العالم الـ 3D */
+        #universe {
+            position: relative; width: 100vw; height: 100vh; perspective: 1000px; display: none;
         }
 
-        .glow-circle {
-            width: 150px; height: 150px;
-            border: 2px solid var(--accent);
-            border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer;
-            box-shadow: 0 0 30px var(--accent);
-            animation: pulse 2s infinite;
-            transition: 0.5s;
-        }
-
-        .glow-circle:hover { transform: scale(1.1); box-shadow: 0 0 60px var(--accent); }
-
-        /* المسرح الـ 3D */
-        #main-world {
-            position: relative;
-            width: 100vw; height: 100vh;
-            perspective: 1200px;
-            display: none; /* يظهر بعد الضغط */
-        }
-
-        .space-ship {
-            position: absolute;
-            width: 100%; height: 100%;
-            transform-style: preserve-3d;
-            transition: transform 0.1s;
-        }
-
-        /* أسطوانة الصور */
-        .photo-cylinder {
-            position: absolute;
-            width: 100%; height: 100%;
-            transform-style: preserve-3d;
-            animation: rotateWorld 40s infinite linear;
+        #cylinder {
+            position: absolute; width: 100%; height: 100%; transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
         }
 
         .photo-card {
-            position: absolute;
-            width: 180px; height: 240px;
-            left: 50%; top: 50%;
-            margin-left: -90px; margin-top: -120px;
-            border: 3px solid #fff;
-            box-shadow: 0 0 25px rgba(255, 0, 85, 0.6);
-            border-radius: 10px;
-            overflow: hidden;
-            backface-visibility: visible;
+            position: absolute; width: 150px; height: 200px; left: 50%; top: 40%;
+            margin-left: -75px; border: 3px solid #fff; border-radius: 10px;
+            box-shadow: 0 0 15px var(--accent); overflow: hidden;
+            transition: transform 0.2s; /* لجعل الهز ناعماً */
         }
 
         .photo-card img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* شاشة الكلام (واضحة جداً) */
-        .speech-panel {
-            position: fixed;
-            bottom: 50px; left: 50%;
-            transform: translateX(-50%);
-            width: 85%; max-width: 700px;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(20px);
-            padding: 30px;
-            border-radius: 25px;
-            border: 1px solid var(--accent);
-            box-shadow: 0 0 40px rgba(0,0,0,1);
-            text-align: center;
-            z-index: 1000;
-            direction: rtl;
+        /* تأثير الهزة (Shake Animation) */
+        @keyframes jitter {
+            0% { transform: translate(0,0) rotate(0deg); }
+            25% { transform: translate(5px, 5px) rotate(5deg); }
+            50% { transform: translate(-5px, -5px) rotate(-5deg); }
+            75% { transform: translate(5px, -5px) rotate(2deg); }
+            100% { transform: translate(0,0) rotate(0deg); }
         }
 
-        .speech-panel h2 {
-            font-family: 'Amiri', serif;
-            color: var(--gold);
-            font-size: 32px; margin: 0 0 15px 0;
+        .shaking { animation: jitter 0.2s infinite !important; }
+
+        /* لوحة الكلام الواضحة */
+        .speech-box {
+            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+            width: 80%; background: rgba(0,0,0,0.85); border: 1px solid var(--accent);
+            padding: 20px; border-radius: 20px; text-align: center; z-index: 100;
+            direction: rtl; backdrop-filter: blur(10px);
         }
 
-        .speech-panel p {
-            font-size: 20px; line-height: 1.6;
-            color: #eee; margin: 0;
-            min-height: 60px;
-        }
+        #love-text { font-size: 20px; color: #fff; margin: 0; }
 
-        /* أنيميشن */
-        @keyframes rotateWorld {
-            from { transform: rotateY(0deg); }
-            to { transform: rotateY(360deg); }
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 20px var(--accent); }
-            50% { box-shadow: 0 0 50px var(--accent); }
-            100% { box-shadow: 0 0 20px var(--accent); }
-        }
-
-        /* جزيئات طائرة */
-        .star {
-            position: absolute; background: white; border-radius: 50%; opacity: 0.5;
-        }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
     </style>
 </head>
 <body>
 
-    <div id="start-screen" onclick="enterWorld()">
-        <div class="glow-circle">❤️</div>
-        <h2 style="margin-top: 30px; letter-spacing: 3px; color: var(--accent);">اضغطي لفتح عالمك</h2>
+    <div id="intro" onclick="startExperience()">
+        <div class="heart-btn">❤️</div>
+        <h2 style="color:var(--accent); margin-top:20px;">اضغطي هنا يا حبيبتي</h2>
+        <p style="color:#666; font-size:12px;">(هزي الموبايل لما تفتحي الصور!)</p>
     </div>
 
-    <div id="main-world">
-        <div class="space-ship" id="ship">
-            <div class="photo-cylinder" id="cylinder">
-                <!-- الصور ستضاف هنا -->
-            </div>
-        </div>
-
-        <div class="speech-panel">
-            <h2 id="title">إلى ملكتي..</h2>
-            <p id="typed-text"></p>
+    <div id="universe">
+        <div id="cylinder"></div>
+        <div class="speech-box">
+            <p id="love-text">جاري تحضير المفاجأة...</p>
         </div>
     </div>
 
     <audio id="music" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3" type="audio/mpeg">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
     </audio>
 
     <script>
-        // 1. ضع هنا روابط صورك الكثيرة
+        // 1. صورك
         const images = [
-            'https://picsum.photos/400/600?random=1',
-            'https://picsum.photos/400/600?random=2',
-            'https://picsum.photos/400/600?random=3',
-            'https://picsum.photos/400/600?random=4',
-            'https://picsum.photos/400/600?random=5',
-            'https://picsum.photos/400/600?random=6',
-            'https://picsum.photos/400/600?random=7',
-            'https://picsum.photos/400/600?random=8',
-            'https://picsum.photos/400/600?random=9',
-            'https://picsum.photos/400/600?random=10'
+            'https://picsum.photos/300/400?random=1',
+            'https://picsum.photos/300/400?random=2',
+            'https://picsum.photos/300/400?random=3',
+            'https://picsum.photos/300/400?random=4',
+            'https://picsum.photos/300/400?random=5',
+            'https://picsum.photos/400/500?random=6',
+            'https://picsum.photos/400/500?random=7',
+            'https://picsum.photos/400/500?random=8'
         ];
 
-        // 2. الكلام الواضح والمرتب
-        const story = [
-            "أهلاً بكِ في عالمي الذي لا يوجد فيه أحد غيرك..",
-            "كل صورة تظهر حولنا هي نبضة من نبضات قلبي..",
-            "انتي لستِ مجرد حبيبة، انتي أكسجين حياتي الذي أتنفسه..",
-            "كتبتُ لكِ هذا العالم البرمجي لأثبت لكِ أنكِ دنيتي الخاصة..",
-            "انظري للصور حولك، هي ذكرياتنا التي سأحميها للأبد..",
-            "أعدكِ أن نملأ هذا الفضاء بمزيد من الصور والضحكات..",
-            "بحبك قد كل نجمة سابحة في هذا الفضاء..",
-            "يا أغلى من روحي.. دمتِ لي شيئاً جميلاً لا ينتهي ❤️"
+        // 2. كلامك
+        const messages = [
+            "أهلاً بكِ في عالمكِ الخاص ❤️",
+            "هزي الموبايل وشوفي الصور بتعمل إيه!",
+            "كل صورة هي لحظة غالية في عمري..",
+            "انتي الوحيدة اللي في قلبي ودنيتي..",
+            "بحبك النهاردة، وبكرة، وللأبد..",
+            "مقدرش أعيش من غير ضحكتك دي."
         ];
 
-        function enterWorld() {
-            document.getElementById('start-screen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('start-screen').style.display = 'none';
-                document.getElementById('main-world').style.display = 'block';
-                document.getElementById('music').play();
-                initWorld();
-                startTyping();
-            }, 1000);
+        let canShake = false;
+
+        async function startExperience() {
+            // طلب إذن حساسات الحركة (خاص بالآيفون)
+            if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                try {
+                    const permission = await DeviceMotionEvent.requestPermission();
+                    if (permission === 'granted') { canShake = true; }
+                } catch (e) { console.error(e); }
+            } else {
+                canShake = true; // للأندرويد يعمل مباشرة
+            }
+
+            document.getElementById('intro').style.display = 'none';
+            document.getElementById('universe').style.display = 'block';
+            document.getElementById('music').play();
+            
+            initPhotos();
+            startText();
+            if (canShake) listenToShake();
         }
 
-        function initWorld() {
+        function initPhotos() {
             const cylinder = document.getElementById('cylinder');
-            const total = 18; // عدد الصور في الأسطوانة
-            const radius = 600; // قطر الدائرة
-
+            const total = 12; // عدد الصور الكلي
             for (let i = 0; i < total; i++) {
                 const card = document.createElement('div');
                 card.className = 'photo-card';
-                
                 const img = document.createElement('img');
                 img.src = images[i % images.length];
+                card.appendChild(img);
                 
                 const angle = (i / total) * 360;
-                card.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
-                
-                card.appendChild(img);
+                card.style.transform = `rotateY(${angle}deg) translateZ(400px)`;
                 cylinder.appendChild(card);
             }
-
-            // إضافة نجوم في الخلفية
-            for(let i=0; i<150; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.style.width = star.style.height = Math.random() * 3 + 'px';
-                star.style.left = Math.random() * 100 + 'vw';
-                star.style.top = Math.random() * 100 + 'vh';
-                document.body.appendChild(star);
-            }
+            // دوران الأسطوانة التلقائي
+            let rotation = 0;
+            setInterval(() => {
+                rotation += 0.2;
+                cylinder.style.transform = `rotateY(${rotation}deg)`;
+            }, 16);
         }
 
-        let storyIndex = 0;
-        function startTyping() {
-            const textElement = document.getElementById('typed-text');
-            if (storyIndex < story.length) {
-                textElement.style.opacity = 0;
+        function startText() {
+            let i = 0;
+            setInterval(() => {
+                document.getElementById('love-text').style.opacity = 0;
                 setTimeout(() => {
-                    textElement.innerText = story[storyIndex];
-                    textElement.style.opacity = 1;
-                    textElement.style.transition = '1s';
-                    storyIndex++;
-                    setTimeout(startTyping, 5000); // 5 ثواني لكل جملة
-                }, 1000);
-            } else {
-                storyIndex = 0; // إعادة الكلام
-                setTimeout(startTyping, 1000);
-            }
+                    document.getElementById('love-text').innerText = messages[i % messages.length];
+                    document.getElementById('love-text').style.opacity = 1;
+                    i++;
+                }, 500);
+            }, 4000);
         }
 
-        // تحريك الكاميرا بالماوس/اللمس
-        document.addEventListener('mousemove', (e) => {
-            const moveX = (e.clientX - window.innerWidth / 2) / 25;
-            const moveY = (e.clientY - window.innerHeight / 2) / 25;
-            document.getElementById('ship').style.transform = `rotateY(${moveX}deg) rotateX(${-moveY}deg)`;
-        });
+        // ميزة "هز الموبايل"
+        function listenToShake() {
+            let lastX, lastY, lastZ;
+            let threshold = 15; // قوة الهزة المطلوبة
+
+            window.addEventListener('devicemotion', (event) => {
+                let acc = event.accelerationIncludingGravity;
+                if (!acc.x) return;
+
+                let deltaX = Math.abs(acc.x - lastX);
+                let deltaY = Math.abs(acc.y - lastY);
+                let deltaZ = Math.abs(acc.z - lastZ);
+
+                if (deltaX + deltaY + deltaZ > threshold) {
+                    // إذا حدث هز، أضف كلاس "shaking" لكل الصور
+                    const cards = document.querySelectorAll('.photo-card');
+                    cards.forEach(c => c.classList.add('shaking'));
+                    
+                    // إيقاف الهز بعد ثانية
+                    setTimeout(() => {
+                        cards.forEach(c => c.classList.remove('shaking'));
+                    }, 1000);
+                }
+
+                lastX = acc.x;
+                lastY = acc.y;
+                lastZ = acc.z;
+            });
+        }
     </script>
 </body>
 </html>
