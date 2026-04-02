@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عالمي الجميل ❤️</title>
+    <!-- خطوط عربية فخمة -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Cairo:wght@600;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #ff0055;
+            --gold: #ffd700;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background: #050505;
+            color: #fff;
+            font-family: 'Cairo', sans-serif;
+            overflow: hidden;
+        }
+
+        /* شاشة البداية السينمائية */
+        #start-screen {
+            position: fixed; inset: 0;
+            background: #000;
+            z-index: 9999;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            transition: 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glow-circle {
+            width: 150px; height: 150px;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer;
+            box-shadow: 0 0 30px var(--accent);
+            animation: pulse 2s infinite;
+            transition: 0.5s;
+        }
+
+        .glow-circle:hover { transform: scale(1.1); box-shadow: 0 0 60px var(--accent); }
+
+        /* المسرح الـ 3D */
+        #main-world {
+            position: relative;
+            width: 100vw; height: 100vh;
+            perspective: 1200px;
+            display: none; /* يظهر بعد الضغط */
+        }
+
+        .space-ship {
+            position: absolute;
+            width: 100%; height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.1s;
+        }
+
+        /* أسطوانة الصور */
+        .photo-cylinder {
+            position: absolute;
+            width: 100%; height: 100%;
+            transform-style: preserve-3d;
+            animation: rotateWorld 40s infinite linear;
+        }
+
+        .photo-card {
+            position: absolute;
+            width: 180px; height: 240px;
+            left: 50%; top: 50%;
+            margin-left: -90px; margin-top: -120px;
+            border: 3px solid #fff;
+            box-shadow: 0 0 25px rgba(255, 0, 85, 0.6);
+            border-radius: 10px;
+            overflow: hidden;
+            backface-visibility: visible;
+        }
+
+        .photo-card img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* شاشة الكلام (واضحة جداً) */
+        .speech-panel {
+            position: fixed;
+            bottom: 50px; left: 50%;
+            transform: translateX(-50%);
+            width: 85%; max-width: 700px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 25px;
+            border: 1px solid var(--accent);
+            box-shadow: 0 0 40px rgba(0,0,0,1);
+            text-align: center;
+            z-index: 1000;
+            direction: rtl;
+        }
+
+        .speech-panel h2 {
+            font-family: 'Amiri', serif;
+            color: var(--gold);
+            font-size: 32px; margin: 0 0 15px 0;
+        }
+
+        .speech-panel p {
+            font-size: 20px; line-height: 1.6;
+            color: #eee; margin: 0;
+            min-height: 60px;
+        }
+
+        /* أنيميشن */
+        @keyframes rotateWorld {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 20px var(--accent); }
+            50% { box-shadow: 0 0 50px var(--accent); }
+            100% { box-shadow: 0 0 20px var(--accent); }
+        }
+
+        /* جزيئات طائرة */
+        .star {
+            position: absolute; background: white; border-radius: 50%; opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen" onclick="enterWorld()">
+        <div class="glow-circle">❤️</div>
+        <h2 style="margin-top: 30px; letter-spacing: 3px; color: var(--accent);">اضغطي لفتح عالمك</h2>
+    </div>
+
+    <div id="main-world">
+        <div class="space-ship" id="ship">
+            <div class="photo-cylinder" id="cylinder">
+                <!-- الصور ستضاف هنا -->
+            </div>
+        </div>
+
+        <div class="speech-panel">
+            <h2 id="title">إلى ملكتي..</h2>
+            <p id="typed-text"></p>
+        </div>
+    </div>
+
+    <audio id="music" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // 1. ضع هنا روابط صورك الكثيرة
+        const images = [
+            'https://picsum.photos/400/600?random=1',
+            'https://picsum.photos/400/600?random=2',
+            'https://picsum.photos/400/600?random=3',
+            'https://picsum.photos/400/600?random=4',
+            'https://picsum.photos/400/600?random=5',
+            'https://picsum.photos/400/600?random=6',
+            'https://picsum.photos/400/600?random=7',
+            'https://picsum.photos/400/600?random=8',
+            'https://picsum.photos/400/600?random=9',
+            'https://picsum.photos/400/600?random=10'
+        ];
+
+        // 2. الكلام الواضح والمرتب
+        const story = [
+            "أهلاً بكِ في عالمي الذي لا يوجد فيه أحد غيرك..",
+            "كل صورة تظهر حولنا هي نبضة من نبضات قلبي..",
+            "انتي لستِ مجرد حبيبة، انتي أكسجين حياتي الذي أتنفسه..",
+            "كتبتُ لكِ هذا العالم البرمجي لأثبت لكِ أنكِ دنيتي الخاصة..",
+            "انظري للصور حولك، هي ذكرياتنا التي سأحميها للأبد..",
+            "أعدكِ أن نملأ هذا الفضاء بمزيد من الصور والضحكات..",
+            "بحبك قد كل نجمة سابحة في هذا الفضاء..",
+            "يا أغلى من روحي.. دمتِ لي شيئاً جميلاً لا ينتهي ❤️"
+        ];
+
+        function enterWorld() {
+            document.getElementById('start-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('start-screen').style.display = 'none';
+                document.getElementById('main-world').style.display = 'block';
+                document.getElementById('music').play();
+                initWorld();
+                startTyping();
+            }, 1000);
+        }
+
+        function initWorld() {
+            const cylinder = document.getElementById('cylinder');
+            const total = 18; // عدد الصور في الأسطوانة
+            const radius = 600; // قطر الدائرة
+
+            for (let i = 0; i < total; i++) {
+                const card = document.createElement('div');
+                card.className = 'photo-card';
+                
+                const img = document.createElement('img');
+                img.src = images[i % images.length];
+                
+                const angle = (i / total) * 360;
+                card.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
+                
+                card.appendChild(img);
+                cylinder.appendChild(card);
+            }
+
+            // إضافة نجوم في الخلفية
+            for(let i=0; i<150; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = star.style.height = Math.random() * 3 + 'px';
+                star.style.left = Math.random() * 100 + 'vw';
+                star.style.top = Math.random() * 100 + 'vh';
+                document.body.appendChild(star);
+            }
+        }
+
+        let storyIndex = 0;
+        function startTyping() {
+            const textElement = document.getElementById('typed-text');
+            if (storyIndex < story.length) {
+                textElement.style.opacity = 0;
+                setTimeout(() => {
+                    textElement.innerText = story[storyIndex];
+                    textElement.style.opacity = 1;
+                    textElement.style.transition = '1s';
+                    storyIndex++;
+                    setTimeout(startTyping, 5000); // 5 ثواني لكل جملة
+                }, 1000);
+            } else {
+                storyIndex = 0; // إعادة الكلام
+                setTimeout(startTyping, 1000);
+            }
+        }
+
+        // تحريك الكاميرا بالماوس/اللمس
+        document.addEventListener('mousemove', (e) => {
+            const moveX = (e.clientX - window.innerWidth / 2) / 25;
+            const moveY = (e.clientY - window.innerHeight / 2) / 25;
+            document.getElementById('ship').style.transform = `rotateY(${moveX}deg) rotateX(${-moveY}deg)`;
+        });
+    </script>
+</body>
+</html>
