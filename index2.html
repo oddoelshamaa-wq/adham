@@ -67,53 +67,67 @@
 
 <script>
     let giftData = null;
+// رابط ملف البيانات الخاص بك على جيت هاب
+const dataUrl = "https://raw.githubusercontent.com/oddoelshamaa-wq/adham/main/data.json";
 
-    function checkPassword() {
-        giftData = JSON.parse(localStorage.getItem('momGiftData'));
-        const entered = document.getElementById('userPass').value;
-        const correct = giftData ? giftData.password : "1234";
-
-        if (entered === correct) {
-            document.getElementById('lock-screen').style.display = 'none';
-            document.getElementById('world').style.display = 'block';
-            document.getElementById('momSong').play();
-            startHearts();
-        } else {
-            alert("كلمة السر خطأ!");
-        }
+async function loadGlobalData() {
+    try {
+        const response = await fetch(dataUrl + "?t=" + new Date().getTime()); // لمنع الكاش
+        giftData = await response.json();
+    } catch (e) {
+        console.error("خطأ في تحميل البيانات");
     }
+}
 
-    function openBox() {
-        document.getElementById('boxArea').style.display = 'none';
-        const scroll = document.getElementById('scrollContent');
-        scroll.style.display = 'block';
-        
-        // تعبئة البيانات
-        document.getElementById('displayTitle').innerText = giftData.title;
-        const area = document.getElementById('albumArea');
-        area.innerHTML = "";
-        
-        giftData.album.forEach(item => {
-            area.innerHTML += `
-                <div class="story-item">
-                    <img src="${item.img}" class="story-img">
-                    <div class="story-text">${item.text}</div>
-                </div>
-            `;
-        });
-    }
+// تحميل البيانات بمجرد فتح الصفحة
+loadGlobalData();
 
-    function startHearts() {
-        setInterval(() => {
-            const h = document.createElement('div');
-            h.className = 'floating-heart';
-            h.innerHTML = ["❤️", "🌸", "✨"][Math.floor(Math.random()*3)];
-            h.style.left = Math.random() * 100 + "vw";
-            h.style.fontSize = (Math.random() * 20 + 20) + "px";
-            document.body.appendChild(h);
-            setTimeout(() => h.remove(), 4000);
-        }, 500);
+function checkPassword() {
+    if (!giftData) return alert("جاري تحميل البيانات، انتظر ثانية...");
+    
+    const entered = document.getElementById('userPass').value;
+    const correct = giftData.password;
+
+    if (entered === correct) {
+        document.getElementById('lock-screen').style.display = 'none';
+        document.getElementById('world').style.display = 'block';
+        document.getElementById('momSong').play();
+        startHearts();
+    } else {
+        alert("كلمة السر خطأ!");
     }
+}
+
+function openBox() {
+    document.getElementById('boxArea').style.display = 'none';
+    const scroll = document.getElementById('scrollContent');
+    scroll.style.display = 'block';
+    
+    document.getElementById('displayTitle').innerText = giftData.title;
+    const area = document.getElementById('albumArea');
+    area.innerHTML = "";
+    
+    giftData.album.forEach(item => {
+        area.innerHTML += `
+            <div class="story-item">
+                <img src="${item.img}" class="story-img">
+                <div class="story-text">${item.text}</div>
+            </div>
+        `;
+    });
+}
+
+function startHearts() {
+    setInterval(() => {
+        const h = document.createElement('div');
+        h.className = 'floating-heart';
+        h.innerHTML = ["❤️", "🌸", "✨"][Math.floor(Math.random()*3)];
+        h.style.left = Math.random() * 100 + "vw";
+        h.style.fontSize = (Math.random() * 20 + 20) + "px";
+        document.body.appendChild(h);
+        setTimeout(() => h.remove(), 4000);
+    }, 500);
+}
 </script>
 </body>
 </html>
