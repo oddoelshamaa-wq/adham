@@ -65,29 +65,63 @@
     }
 
     // حفظ كل البيانات في المتصفح
-    function saveEverything() {
-        const sections = [];
-        const items = document.querySelectorAll('.section-item');
-        
-        items.forEach(item => {
-            const id = item.id.split('_')[1];
-            const imgSrc = document.getElementById('prev_' + id).src;
-            const textVal = document.getElementById('text_' + id).value;
-            
-            if (imgSrc.startsWith('data:image') || imgSrc.startsWith('http')) {
-                sections.push({ img: imgSrc, text: textVal });
-            }
+    async function saveEverything() {
+    const token = document.getElementById('ghToken').value;
+    if (!token) return alert("من فضلك أدخل GitHub Token أولاً!");
+
+    const sections = [];
+    const items = document.querySelectorAll('.section-item');
+    
+    items.forEach(item => {
+        const id = item.id.split('_')[1];
+        const imgSrc = document.getElementById('prev_' + id).src;
+        const textVal = document.getElementById('text_' + id).value;
+        if (imgSrc.startsWith('data:image') || imgSrc.startsWith('http')) {
+            sections.push({ img: imgSrc, text: textVal });
+        }
+    });
+
+    const data = {
+        password: document.getElementById('giftPassword').value || "1234",
+        title: document.getElementById('mainTitle').value || "إلى أمي الغالية",
+        album: sections
+    };
+
+    // إعدادات الرفع لـ GitHub
+    const repo = "oddoelshamaa-wq/adham"; // تأكد أن هذا هو اسم حسابك/المستودع
+    const path = "data.json";
+    const url = `https://api.github.com/repos/${repo}/contents/${path}`;
+
+    try {
+        // 1. الحصول على الـ SHA (مهم جداً للتحديث)
+        const getFile = await fetch(url);
+        const fileData = await getFile.json();
+        const sha = fileData.sha;
+
+        // 2. رفع البيانات الجديدة
+        const response = await fetch(url, {
+            method: "PUT",
+            headers: {
+                "Authorization": `token ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: "تحديث ألبوم الصور",
+                content: btoa(unescape(encodeURIComponent(JSON.stringify(data)))),
+                sha: sha
+            })
         });
 
-        const data = {
-            password: document.getElementById('giftPassword').value || "1234",
-            title: document.getElementById('mainTitle').value || "إلى أمي الغالية",
-            album: sections
-        };
-
-        localStorage.setItem('momGiftData', JSON.stringify(data));
-        alert('تم الحفظ بنجاح! افتح الآن ملف العرض index.html');
+        if (response.ok) {
+            alert('✅ تم الحفظ والنشر للجميع بنجاح! قد يستغرق التحديث دقيقة ليظهر.');
+        } else {
+            alert('❌ فشل الحفظ، تأكد من صحة الـ Token');
+        }
+    } catch (error) {
+        console.error(error);
+        alert('حدث خطأ في الاتصال بـ GitHub');
     }
+}
 
     // تحميل البيانات إذا كانت محفوظة من قبل
     window.onload = function() {
